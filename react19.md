@@ -103,9 +103,9 @@ const About = lazy(() => import("./pages/About"));
 // 루트 레이아웃 컴포넌트
 const RootLayout = () => {
   return (
-    <GlobalErrorBoundary>
+    <div className="h-screen w-full">
       <Outlet />
-    </GlobalErrorBoundary>
+    </div>
   );
 };
 
@@ -125,101 +125,6 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
-```
-
-이제 전역 에러 발생시 에러 내용을 표시하는 대신 사용자 친화적인 메시지를 표시하도록 `/src/components/error/GlobalErrorBoundary.tsx` 파일을 생성하고, 다음과 같이 작성합니다.
-
-```tsx
-import { Component, ReactNode, ErrorInfo } from "react";
-import FetcherError from "./FetcherError";
-
-interface ErrorBoundaryProps {
-  children: ReactNode;
-}
-
-interface State {
-  hasError: boolean;
-  error?: Error;
-  errorInfo?: ErrorInfo;
-}
-
-// 에러 경계 컴포넌트
-class GlobalErrorBoundary extends Component<ErrorBoundaryProps, State> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: undefined,
-      errorInfo: undefined,
-    };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    // 다음 렌더링에서 대체 UI가 보이도록 상태를 업데이트
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // 에러 로깅
-    this.setState({
-      error,
-      errorInfo,
-    });
-    console.error("Uncaught error:", error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      // 일반 에러의 경우
-      return (
-        <FetcherError
-          title="요청을 처리하는 중 오류가 발생했습니다."
-          message="잠시후 다시 시도해주세요."
-          handleReload={() => {
-            this.setState({ hasError: false });
-            window.location.reload();
-          }}
-        />
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
-export default GlobalErrorBoundary;
-```
-
-그리고 에러 발생시 다시 시도할 수 있는 버튼을 표시할 컴포넌트를 `src/components/error/FetcherError.tsx` 파일을 생성하고 다음과 같이 작성합니다.
-
-```tsx
-interface Props {
-  error?: Error;
-  title?: string;
-  message: string;
-  handleReload: () => void;
-}
-
-const FetcherError = ({ title, message, handleReload }: Props) => {
-  return (
-    <div className="flex flex-col mt-[70px] w-full items-center justify-center">
-      <div className="flex items-center justify-center">
-        {title && <h1 className="mb-[10px] text-[24px] font-bold">{title}</h1>}
-      </div>
-      <div className="flex items-center justify-center">
-        <div className="text-[18px]">{message}</div>
-      </div>
-      <button
-        className="mt-[40px] flex h-[36px] w-[184px] items-center justify-center rounded bg-purple-600 px-4 py-2 text-base font-bold text-white hover:bg-purple-700"
-        onClick={handleReload}
-      >
-        다시 시도하기
-      </button>
-    </div>
-  );
-};
-
-export default FetcherError;
 ```
 
 라우팅 확인을 위해 `src/pages/Index.tsx` 파일을 다음과 같이 작성합니다.
@@ -623,4 +528,221 @@ const Index = () => {
 export default Index;
 ```
 
-직접 `setError`를 통해 오류 메세지를 설정할 필요 없이 useActionState 훅을 통해 Action의 결과와 진행 상태를 관리할 수 있습니다. 그리고 이전 상태까지고 접근할 수 있어서, 뭔가 이전 상태에 따른 처리를 할 수도 있습니다.
+직접 `setError`를 통해 오류 메세지를 설정할 필요 없이 useActionState 훅을 통해 Action의 결과와 진행 상태를 관리할 수 있습니다. 그리고 이전 상태까지도 접근할 수 있어서, 뭔가 이전 상태에 따른 처리를 할 수도 있습니다.
+
+#### 2.1.3 use
+
+아마도 웹에서 가장 빈번한 작업을 서버에서 비동기(async)로 데이터를 조회해서 목록을 출력하는 작업일겁니다. 그런 작업을 하나 추가해볼까요? `pages/List.tsx` 파일을 추가하고 다음과 같이 작성합니다.
+
+> 단순한 구현을 위해 코드 중복은 무시하겠습니다!
+
+```tsx
+import { Suspense } from "react";
+import { Link } from "react-router-dom";
+import MemberList from "./components/MemberList";
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * 멤버 목록을 조회하는 함수
+ * @returns 멤버 목록
+ */
+const fetchMemberList = async () => {
+  await wait(2000); // 서버와의 통신을 흉내내기 위해 2초 대기
+
+  return [
+    { id: 1, name: "John" },
+    { id: 2, name: "Jane" },
+    { id: 3, name: "Jim" },
+  ];
+};
+
+const List = () => {
+  return (
+    <div className="h-screen w-full flex flex-col">
+      <div className="w-full flex items-center gap-2 text-blue-500 underline">
+        <Link to="/">Index</Link>
+        <Link to="/about">About</Link>
+      </div>
+      <div className="text-4xl font-bold">List</div>
+      <div className="flex flex-col gap-2">
+        {/* 비동기 처리를 위해 Suspense를 사용 */}
+        <Suspense fallback={<div>목록을 불러오는 중입니다...</div>}>
+          {/* 멤버 목록을 조회하는 함수의 Promise를 넘겨줍니다. */}
+          <MemberList memberListPromise={fetchMemberList()} />
+        </Suspense>
+      </div>
+    </div>
+  );
+};
+
+export default List;
+```
+
+`MemberList` 컴포넌트에 멤버 목록을 조회하는 함수의 결과인 Promise를 넘겨주고 있습니다.
+이제 `pages/components/MemberList.tsx` 파일을 추가하고 다음과 같이 작성합니다.
+
+```tsx
+import { use } from "react";
+
+interface MemberListProps {
+  memberListPromise: Promise<
+    {
+      id: number;
+      name: string;
+    }[]
+  >;
+}
+
+/**
+ * 멤버 목록을 조회하는 컴포넌트
+ * @param memberListPromise 멤버 목록을 조회하는 Promise
+ * @returns 멤버 목록
+ */
+const MemberList = ({ memberListPromise }: MemberListProps) => {
+  // Promise의 결과가 resolve될 때까지 기다립니다.
+  const memberList = use(memberListPromise);
+
+  return (
+    <ul>
+      {memberList.map((member) => (
+        <li key={member.id}>{`${member.id} - ${member.name}`}</li>
+      ))}
+    </ul>
+  );
+};
+
+export default MemberList;
+```
+
+Promise를 받아서 `use` 훅으로 넘겨줍니다. `use` 훅은 Promise 결과가 나올 때 까지(resolve 또는 reject) 기다리고, 그 결과를 반환합니다. 결과를 받아서 `li` 요소를 생성합니다.
+
+마지막으로 `Router.tsx` 파일에 다음과 같이 라우팅을 추가합니다.
+
+```tsx
+import { lazy } from "react";
+import { createBrowserRouter, Outlet } from "react-router-dom";
+
+const Index = lazy(() => import("./pages/Index"));
+const About = lazy(() => import("./pages/About"));
+const List = lazy(() => import("./pages/List"));
+
+// 루트 레이아웃 컴포넌트
+// eslint-disable-next-line react-refresh/only-export-components
+const RootLayout = () => {
+  return (
+    <div className="h-screen w-full">
+      <Outlet />
+    </div>
+  );
+};
+
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
+        element: <Index />,
+      },
+      {
+        path: "/about",
+        element: <About />,
+      },
+      {
+        path: "/list",
+        element: <List />,
+      },
+    ],
+  },
+]);
+```
+
+이제 브라우저에서 `http://localhost:3000/list` 주소로 이동하면, 서버의 응답을 기다리는 동안 `Suspense` 컴포넌트의 `fallback` 속성으로 설정한 내용이 표시되다가 서버의 응답이 오면 멤버 목록을 조회하는 작업이 진행되는 걸 볼 수 있습니다.
+
+[이미지]
+
+만약 서버에서 데이터를 조회하는 작업이 실패한다면, 그러니까 Promise가 reject 된다면 어떻게 될까요? `fetchMemberList` 함수에서 일부러 오류가 발생하도록 수정해볼까요?
+
+```tsx
+/**
+ * 멤버 목록을 조회하는 함수
+ * @returns 멤버 목록
+ */
+const fetchMemberList = async () => {
+  throw new Error("서버에 문제가 발생했습니다.");
+  await wait(2000); // 서버와의 통신을 흉내내기 위해 2초 대기
+
+  return [
+    { id: 1, name: "John" },
+    { id: 2, name: "Jane" },
+    { id: 3, name: "Jim" },
+  ];
+};
+```
+
+페이지를 새로고침 해보면, 컴포넌트 내용 대신에 오류 메세지가 표시됩니다!
+
+[이미지]
+
+이럴 때는 Promise에 catch 핸들러를 추가할 수도 있지만, `ErrorBoundary`를 사용해서 오류를 사용자에게 친화적인 메시지로 표시할 수 있습니다. 우선, `react-error-boundary` 패키지를 설치합니다.
+
+```bash
+> npm install react-error-boundary
+```
+
+그리고 `src/pages/List.tsx` 파일의 `Suspense` 컴포넌트를 `ErrorBoundary` 컴포넌트로 감싸줍니다.
+
+```tsx
+import { Suspense } from "react";
+import { Link } from "react-router-dom";
+import MemberList from "./components/MemberList";
+import { ErrorBoundary } from "react-error-boundary";
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * 멤버 목록을 조회하는 함수
+ * @returns 멤버 목록
+ */
+const fetchMemberList = async () => {
+  throw new Error("서버에 문제가 발생했습니다.");
+  await wait(2000); // 서버와의 통신을 흉내내기 위해 2초 대기
+
+  return [
+    { id: 1, name: "John" },
+    { id: 2, name: "Jane" },
+    { id: 3, name: "Jim" },
+  ];
+};
+
+const List = () => {
+  return (
+    <div className="h-screen w-full flex flex-col">
+      <div className="w-full flex items-center gap-2 text-blue-500 underline">
+        <Link to="/">Index</Link>
+        <Link to="/about">About</Link>
+      </div>
+      <div className="text-4xl font-bold">List</div>
+      <div className="flex flex-col gap-2">
+        <ErrorBoundary
+          fallback={<div>목록을 불러오는 중에 문제가 발생했습니다.</div>}
+        >
+          {/* 비동기 처리를 위해 Suspense를 사용 */}
+          <Suspense fallback={<div>목록을 불러오는 중입니다...</div>}>
+            {/* 멤버 목록을 조회하는 함수의 Promise를 넘겨줍니다. */}
+            <MemberList memberListPromise={fetchMemberList()} />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+    </div>
+  );
+};
+
+export default List;
+```
+
+이렇게 하면 데이터를 조회하는 작업이 실패했을 때, 사용자에게 친화적인 메시지를 표시할 수 있습니다.
+
+[이미지]
