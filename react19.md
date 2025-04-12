@@ -747,7 +747,7 @@ export default List;
 
 <p align="center"><img src="./images/06.png"></p>
 
-# React 19.1 업이데트하기
+# React 19.1 업데이트하기
 
 다음 명령을 통해 설치된 패키지의 현재 버전과 최신 버전을 확인합니다.
 
