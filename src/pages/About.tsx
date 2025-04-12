@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Parent from "./components/Parent";
 
 const About = () => {
   return (
@@ -8,6 +9,7 @@ const About = () => {
         <Link to="/about">About</Link>
       </div>
       <div className="text-4xl font-bold">About</div>
+      <Parent />
     </div>
   );
 };

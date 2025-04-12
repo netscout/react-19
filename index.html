@@ -7,6 +7,26 @@
     <title>Vite + React + TS</title>
   </head>
   <body>
+    <!--
+  Error dialog in raw HTML
+  since an error in the React app may crash.
+-->
+<div id="error-dialog" class="hidden">
+  <h1 id="error-title" class="text-red">Error</h1>
+  <p class="">
+    <pre id="error-body"></pre>
+  </p>
+  <div class="mb-10"></div>
+  <h2 class="">Owner Stack:</h2>
+  <pre id="error-owner-stack" class="nowrap"></pre>
+  <button
+    id="error-close"
+    class="mt-10"
+    onclick="document.getElementById('error-dialog').classList.add('hidden')"
+  >
+    Close
+  </button>
+</div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

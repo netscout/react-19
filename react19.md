@@ -244,13 +244,13 @@ export default Index;
 
 완성된 페이지는 다음과 같습니다.
 
-[이미지]
+<p align="center"><img src="./images/01.png"></p>
 
 메세지를 입력할 수 있는 입력 필드와 저장 버튼을 표시하고, 저장 버튼을 클릭하면 메세지를 서버에 저장하는 기능을 구현했습니다. 그리고 서버에 저장하는 걸 흉내내기 위해서 저장 버튼을 누르면 2초 대기 후 저장된 메세지를 표시하도록 했습니다.
 
 이 페이지에서 메세지를 입력하고, 저장 버튼을 누르면 2초 후에 저장된 메세지가 로그에 표시되는 걸 확인할 수 있습니다. 그런데 저장 버튼을 마구 누르면 어떻게 될까요?
 
-[이미지]
+<p align="center"><img src="./images/02.png"></p>
 
 서버에 저장하는 동안 입력을 방지하는 작업을 하지 않았기 때문에 누르는 만큼 중복되어 저장되는 걸 볼 수 있습니다. 그러면 입력을 방지하기 위한 장치를 추가해보겠습니다.
 
@@ -426,7 +426,7 @@ export default Index;
 
 이제 저장 버튼을 누르면 2초 대기 후 에러 메세지가 표시되는 걸 볼 수 있습니다.
 
-[이미지]
+<p align="center"><img src="./images/03.png"></p>
 
 React 19에 추가된 `useActionState` 훅을 사용하면, 이런 폼 전송 작업의 상태와 에러 처리를 더 쉽게 할 수 있습니다.
 
@@ -661,7 +661,7 @@ export const router = createBrowserRouter([
 
 이제 브라우저에서 `http://localhost:3000/list` 주소로 이동하면, 서버의 응답을 기다리는 동안 `Suspense` 컴포넌트의 `fallback` 속성으로 설정한 내용이 표시되다가 서버의 응답이 오면 멤버 목록을 조회하는 작업이 진행되는 걸 볼 수 있습니다.
 
-[이미지]
+<p align="center"><img src="./images/04.png"></p>
 
 만약 서버에서 데이터를 조회하는 작업이 실패한다면, 그러니까 Promise가 reject 된다면 어떻게 될까요? `fetchMemberList` 함수에서 일부러 오류가 발생하도록 수정해볼까요?
 
@@ -684,7 +684,7 @@ const fetchMemberList = async () => {
 
 페이지를 새로고침 해보면, 컴포넌트 내용 대신에 오류 메세지가 표시됩니다!
 
-[이미지]
+<p align="center"><img src="./images/05.png"></p>
 
 이럴 때는 Promise에 catch 핸들러를 추가할 수도 있지만, `ErrorBoundary`를 사용해서 오류를 사용자에게 친화적인 메시지로 표시할 수 있습니다. 우선, `react-error-boundary` 패키지를 설치합니다.
 
@@ -745,4 +745,298 @@ export default List;
 
 이렇게 하면 데이터를 조회하는 작업이 실패했을 때, 사용자에게 친화적인 메시지를 표시할 수 있습니다.
 
-[이미지]
+<p align="center"><img src="./images/06.png"></p>
+
+# React 19.1 업이데트하기
+
+다음 명령을 통해 설치된 패키지의 현재 버전과 최신 버전을 확인합니다.
+
+```
+> npm outdated
+Package                   Current   Wanted  Latest  Location                               Depended by
+@eslint/js                 9.22.0   9.24.0  9.24.0  node_modules/@eslint/js                react-19
+@tailwindcss/vite          4.0.14    4.1.3   4.1.3  node_modules/@tailwindcss/vite         react-19
+@types/react              19.0.10   19.1.1  19.1.1  node_modules/@types/react              react-19
+@types/react-dom           19.0.4   19.1.2  19.1.2  node_modules/@types/react-dom          react-19
+@vitejs/plugin-react-swc    3.8.0    3.8.1   3.8.1  node_modules/@vitejs/plugin-react-swc  react-19
+eslint                     9.22.0   9.24.0  9.24.0  node_modules/eslint                    react-19
+globals                   15.15.0  15.15.0  16.0.0  node_modules/globals                   react-19
+react                      19.0.0   19.1.0  19.1.0  node_modules/react                     react-19
+react-dom                  19.0.0   19.1.0  19.1.0  node_modules/react-dom                 react-19
+react-router-dom            7.3.0    7.5.0   7.5.0  node_modules/react-router-dom          react-19
+tailwindcss                4.0.14    4.1.3   4.1.3  node_modules/tailwindcss               react-19
+typescript                  5.7.3    5.7.3   5.8.3  node_modules/typescript                react-19
+typescript-eslint          8.26.1   8.29.1  8.29.1  node_modules/typescript-eslint         react-19
+vite                        6.2.2    6.2.6   6.2.6  node_modules/vite                      react-19
+```
+
+위 내용 중 `Current`, `Wanted`, `Latest` 열은 다음과 같은 의미를 가집니다.
+
+- Current: 현재 설치된 버전
+- Wanted: package.json 파일에 설정된 버전 범위를 만족하는 최신 버전(ex: "~5.7.2"는 5.7.2 <= 패키지 버전 < 5.8.0, "^6.2.0"은 6.2.0 <= 패키지 버전 < 7.0.0)
+- Latest: 최신 버전
+
+자 그러면, 모든 패키지를 `Wanted` 버전으로 업데이트 하겠습니다.
+
+```bash
+> npm update
+```
+
+이제 다시 패키지 버전을 확인해보면, 다음과 같이 모든 패키지가 최신 버전으로 업데이트 된 것을 확인할 수 있습니다.
+
+## Owner Stacks
+
+React 19.1 버전에서 추가된 Owner Stacks는 컴포넌트의 오류가 발생했을 때, 오류가 발생한 컴포넌트의 계층 구조를 표시해줍니다. 그래서 실제로 어떤 컴포넌트에서 오류가 발생했고, 그 컴포넌트는 어떤 컴포넌트가 렌더링한 건지 확인할 수 있어 디버깅할 때 유용합니다.
+
+[공식 문서](https://react.dev/reference/react/captureOwnerStack)를 참조하여 다음과 같은 예제를 작성해보겠습니다.
+
+우선, 무언가 에러가 발생했을 때 화면에 오버레이를 표시할 수 있도록 `index.html` 파일을 수정합니다.
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+  </head>
+  <body>
+    <!--
+  Error dialog in raw HTML
+  since an error in the React app may crash.
+-->
+<div id="error-dialog" class="hidden">
+  <h1 id="error-title" class="text-red">Error</h1>
+  <p class="">
+    <pre id="error-body"></pre>
+  </p>
+  <div class="mb-10"></div>
+  <h2 class="">Owner Stack:</h2>
+  <pre id="error-owner-stack" class="nowrap"></pre>
+  <button
+    id="error-close"
+    class="mt-10"
+    onclick="document.getElementById('error-dialog').classList.add('hidden')"
+  >
+    Close
+  </button>
+</div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+```
+
+그리고 이 오버레이의 스타일을 `src/index.css` 파일에 추가합니다.
+
+```css
+#error-dialog {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: white;
+  padding: 15px;
+  opacity: 0.9;
+  text-wrap: wrap;
+  overflow: scroll;
+}
+
+#error-dialog h1 {
+  margin-top: 0;
+  font-size: 22px;
+}
+
+#error-dialog h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+#error-dialog .text-red {
+  color: red;
+}
+
+#error-dialog .mb-20 {
+  margin-bottom: 20px;
+}
+
+#error-dialog .mb-10 {
+  margin-bottom: 10px;
+}
+
+#error-dialog .mb-0 {
+  margin-bottom: 0;
+}
+
+#error-dialog .mt-10 {
+  margin-top: 10px;
+}
+
+#error-dialog pre {
+  text-wrap: wrap;
+}
+
+#error-dialog pre.nowrap {
+  text-wrap: nowrap;
+}
+
+#error-dialog .hidden {
+  display: none;
+}
+```
+
+다음으로 오버레이에 에러 메세지와 `Owner Stack`을 표시할 수 있도록 하는 유틸 함수를 `src/utils/errorOverlay.ts` 파일에 추가합니다.
+
+```tsx
+export const onConsoleError = ({
+  consoleMessage,
+  ownerStack,
+}: {
+  consoleMessage: string;
+  ownerStack: string | null;
+}) => {
+  const errorDialog = document.getElementById("error-dialog");
+  const errorBody = document.getElementById("error-body");
+  const errorOwnerStack = document.getElementById("error-owner-stack");
+
+  if (errorBody) {
+    // Display console.error() message
+    errorBody.innerText = consoleMessage;
+  }
+
+  if (errorOwnerStack) {
+    // Display owner stack
+    errorOwnerStack.innerText = ownerStack ?? "-no owner stack-";
+  }
+
+  if (errorDialog) {
+    // Show the dialog
+    errorDialog.classList.remove("hidden");
+  }
+};
+```
+
+이제 마지막으로 `src/main.tsx` 파일에 `console.error` 함수를 재정의하여 `console.error` 함수가 호출될 때 오버레이에 에러 메세지와 `Owner Stack`을 표시할 수 있도록 합니다.
+
+```tsx
+import { captureOwnerStack, StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.tsx";
+import { onConsoleError } from "./utils/errorOverlay.ts";
+
+// 원래의 console.error 함수를 저장
+const originalConsoleError = console.error;
+
+// 재정의된 console.error 함수
+console.error = function patchedConsoleError(...args) {
+  // 원래의 console.error 함수를 호출
+  originalConsoleError.apply(console, args);
+  // Owner Stack을 캡쳐
+  const ownerStack = captureOwnerStack();
+  // 오버레이에 에러 메세지와 Owner Stack을 표시
+  onConsoleError({
+    consoleMessage: args[0],
+    ownerStack,
+  });
+};
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+```
+
+이제 브라우저에서 무언가 에러가 발생했을 때 오버레이에 에러 메세지와 `Owner Stack`을 표시할 수 있습니다. 그러면 간단하게 테스트를 해볼까요?
+
+다음과 같이 `src/pages/components/Parent.tsx`와 `src/pages/components/Child.tsx` 파일을 추가합니다.
+
+```tsx
+const Child = () => {
+  console.error("Child 컴포넌트에서 에러가 발생했습니다.");
+
+  return <div>Child</div>;
+};
+
+export default Child;
+```
+
+```tsx
+import Child from "./Child";
+
+const Parent = () => {
+  return (
+    <>
+      <div>Parent</div>
+      <Child />
+    </>
+  );
+};
+
+export default Parent;
+```
+
+그리고 `src/pages/About.tsx` 파일에 `Parent` 컴포넌트를 추가합니다.
+
+```tsx
+import { Link } from "react-router-dom";
+import Parent from "./components/Parent";
+
+const About = () => {
+  return (
+    <div className="h-screen w-full flex flex-col">
+      <div className="w-full flex items-center gap-2 text-blue-500 underline">
+        <Link to="/">Index</Link>
+        <Link to="/about">About</Link>
+      </div>
+      <div className="text-4xl font-bold">About</div>
+      <Parent />
+    </div>
+  );
+};
+export default About;
+```
+
+이제 브라우저에서 `About` 페이지로 이동해서 에러를 확인해볼까요?
+
+<p align="center"><img src="./images/07.png"></p>
+
+오버레이가 표시되고, `Owner Stack`에 오류가 발생한 컴포넌트의 계층 구조가 표시되는 것을 확인할 수 있습니다. 에러가 발생한 컴포넌트의 부모 컴포넌트는 `Parent` 컴포넌트이고, `Parent` 컴포넌트의 부모 컴포넌트는 `About` 컴포넌트인 거죠.
+
+단, `Owner Stack`은 개발 환경에서만 사용가능하기 때문에 `main.tsx`를 다음과 같이 수정할 필요가 있습니다.
+
+```tsx
+import { captureOwnerStack, StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.tsx";
+import { onConsoleError } from "./utils/errorOverlay.ts";
+
+if (process.env.NODE_ENV === "development") {
+  const originalConsoleError = console.error;
+
+  console.error = function patchedConsoleError(...args) {
+    originalConsoleError.apply(console, args);
+    const ownerStack = captureOwnerStack();
+    onConsoleError({
+      consoleMessage: args[0],
+      ownerStack,
+    });
+  };
+}
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+```
+
+참고로 `process`를 사용하려면 다음 명령으로 `node`의 타입 정보 패키지를 설치해야 합니다.
+
+```bash
+> npm install --save-dev @types/node
+```
